@@ -1,6 +1,6 @@
 # EduMark
 
-Smart QR attendance for classrooms. Teachers put a rotating code on the projector, students scan it with their phone, and the register fills itself in live.
+Smart QR attendance for classrooms. Teachers put a rotating code on the projector, students scan it with their phone, and the register fills itself in live.  
 
 ## Features
 
@@ -84,3 +84,5 @@ wrangler.jsonc             Cloudflare Worker config
 ```bash
 cd server && npm test
 ```
+## Link
+  https://edumark.akshatdiwan11.workers.dev,
