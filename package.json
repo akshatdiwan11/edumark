@@ -3,10 +3,11 @@
   "private": true,
   "description": "EduMark: QR-based smart attendance for classrooms",
   "scripts": {
+    "build": "cd web && npm ci && npm run build",
+    "build:all": "npm --prefix server run build && npm --prefix web run build",
     "install:all": "npm --prefix server install && npm --prefix web install",
     "dev:api": "npm --prefix server run dev",
     "dev:web": "npm --prefix web run dev",
-    "build": "npm --prefix server run build && npm --prefix web run build",
     "test": "npm --prefix server test"
   }
 }

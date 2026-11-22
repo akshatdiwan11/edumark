@@ -19,7 +19,7 @@ Smart QR attendance for classrooms. Teachers put a rotating code on the projecto
 | Web app (`web/`) | React 18, TypeScript, Vite, React Router, hand-written CSS design system, `qr-scanner` for the camera |
 | API (`server/`) | Node.js, Express, TypeScript, Prisma, PostgreSQL, Socket.IO, Zod |
 | Auth | bcrypt password hashes, JWT in an httpOnly cookie |
-| Hosting | API + Postgres on Render, web app on Cloudflare Pages (a Pages Function proxies `/api` so cookies stay first-party) |
+| Hosting | API + Postgres on Render, website on Cloudflare Workers (the Worker proxies `/api` so cookies stay first-party) |
 
 ## Run it locally
 
@@ -49,16 +49,15 @@ Camera and location need a secure context. `localhost` counts as secure; to test
 ### 1. API and database on Render
 
 1. In Render, choose **New → Blueprint** and pick this repository. It reads `render.yaml` and creates `edumark-api` and the `edumark-db` Postgres database. `JWT_SECRET` is generated for you.
-2. When asked, set `CORS_ORIGINS` to your Cloudflare Pages URL (you can fill it in after step 2).
+2. When asked, set `CORS_ORIGINS` to your website URL (you can fill it in after step 2).
 3. Once deployed, note the API URL, e.g. `https://edumark-api.onrender.com`. Check `https://…/api/health` returns `{"ok":true}`.
 4. Optional: load demo data from the Render shell with `npm run db:seed`.
 
-### 2. Web app on Cloudflare Pages
+### 2. Website on Cloudflare Workers
 
-1. In Cloudflare, go to **Workers & Pages → Create → Pages → Connect to Git** and pick this repository.
-2. Build settings: framework preset **None**, root directory `web`, build command `npm run build`, output directory `dist`.
-3. Add the environment variable `API_ORIGIN` = your Render API URL (no trailing slash).
-4. Deploy. `web/functions/api/[[path]].ts` forwards `/api/*` and the WebSocket to Render, and `web/public/_redirects` serves the single-page app.
+1. In Cloudflare, go to **Workers & Pages → Create → Import a repository** and pick this repository.
+2. Keep the defaults: build command `npm run build`, deploy command `npx wrangler deploy`, root directory `/`.
+3. Deploy. `wrangler.jsonc` serves the built app from `web/dist` and runs `web/worker.ts`, which forwards `/api/*` and the WebSocket to Render. If your API URL differs, change `API_ORIGIN` in `wrangler.jsonc`.
 
 Free Render services sleep after 15 minutes without traffic, so the first request after a pause can take up to a minute. A paid instance avoids this.
 
@@ -75,8 +74,9 @@ web/
   src/pages/               landing, auth, teacher and student screens
   src/components/          design-system components, QR renderer, app shell
   src/styles/              tokens, base, components, layout
-  functions/api/           Cloudflare Pages proxy to the API
+  worker.ts                Cloudflare Worker: serves the app, proxies /api
 render.yaml                Render blueprint
+wrangler.jsonc             Cloudflare Worker config
 ```
 
 ## Tests

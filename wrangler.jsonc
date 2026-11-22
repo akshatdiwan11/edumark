@@ -1,0 +1,17 @@
+{
+  
+  "name": "edumark",
+  "main": "web/worker.ts",
+  "compatibility_date": "2025-06-01",
+  "assets": {
+    "directory": "web/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "vars": {
+    // Public URL of the EduMark API on Render.
+    "API_ORIGIN": "https://edumark-api.onrender.com"
+  },
+  "observability": { "enabled": true }
+}
