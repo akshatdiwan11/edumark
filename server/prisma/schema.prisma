@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  TEACHER
+  STUDENT
+}
+
+enum MarkMethod {
+  QR
+  MANUAL
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  rollNumber   String?
+  createdAt    DateTime @default(now())
+
+  courses     Course[]           @relation("TeacherCourses")
+  enrollments Enrollment[]
+  attendance  AttendanceRecord[]
+}
+
+model Course {
+  id        String   @id @default(cuid())
+  code      String
+  name      String
+  joinCode  String   @unique
+  teacherId String
+  createdAt DateTime @default(now())
+
+  teacher     User         @relation("TeacherCourses", fields: [teacherId], references: [id], onDelete: Cascade)
+  enrollments Enrollment[]
+  sessions    ClassSession[]
+
+  @@index([teacherId])
+}
+
+model Enrollment {
+  courseId  String
+  studentId String
+  joinedAt  DateTime @default(now())
+
+  course  Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  student User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([courseId, studentId])
+  @@index([studentId])
+}
+
+model ClassSession {
+  id            String    @id @default(cuid())
+  courseId      String
+  title         String?
+  startedAt     DateTime  @default(now())
+  endedAt       DateTime?
+  /// Secret used to sign the rotating QR tokens. Never sent to clients.
+  secret        String
+  rotateSeconds Int       @default(20)
+  latitude      Float?
+  longitude     Float?
+  radiusMeters  Int?
+
+  course  Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  records AttendanceRecord[]
+
+  @@index([courseId, startedAt])
+}
+
+model AttendanceRecord {
+  id             String     @id @default(cuid())
+  sessionId      String
+  studentId      String
+  markedAt       DateTime   @default(now())
+  method         MarkMethod
+  distanceMeters Float?
+
+  session ClassSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, studentId])
+  @@index([studentId])
+}

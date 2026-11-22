@@ -1,0 +1,30 @@
+# Render Blueprint: deploys the EduMark API and its Postgres database.
+# In Render: New > Blueprint > pick this repo.
+databases:
+  - name: edumark-db
+    plan: free
+    databaseName: edumark
+    user: edumark
+
+services:
+  - type: web
+    name: edumark-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm ci --include=dev && npm run build && npx prisma migrate deploy
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: edumark-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: TRUST_PROXY_HOPS
+        value: "2"
+      - key: CORS_ORIGINS
+        sync: false # set to your Cloudflare Pages URL, e.g. https://edumark.pages.dev
