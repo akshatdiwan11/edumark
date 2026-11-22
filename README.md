@@ -51,7 +51,7 @@ Camera and location need a secure context. `localhost` counts as secure; to test
 1. In Render, choose **New → Blueprint** and pick this repository. It reads `render.yaml` and creates `edumark-api` and the `edumark-db` Postgres database. `JWT_SECRET` is generated for you.
 2. When asked, set `CORS_ORIGINS` to your website URL (you can fill it in after step 2).
 3. Once deployed, note the API URL, e.g. `https://edumark-api.onrender.com`. Check `https://…/api/health` returns `{"ok":true}`.
-4. Optional: load demo data from the Render shell with `npm run db:seed`.
+4. Optional: to load the demo accounts and sample data, set `SEED_DEMO` to `true` in the service's Environment settings and redeploy. It resets only the demo accounts.
 
 ### 2. Website on Cloudflare Workers
 
